@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import csv
+import io
 import sys
 from datetime import datetime
 
@@ -21,6 +22,32 @@ serial = datetime.utcnow().strftime('%Y%m%d%H%M')
 # TODO: find a nice public domain icon for Cherokee
 icon = "py-mode.svg"
 
+
+
+# CSV reader object to parse the syllabary table row by row
+reader = csv.DictReader(sys.stdin)
+# "buf" is a buffer for the replacement table. Collecting metadata
+# (maximum lenght of transliterations, valid characters) requires
+# parsing the input before writing the file header.
+buf = io.StringIO()
+# used to remember the maximum length of transliterations
+maxlen = 0
+# set to collect all characters occurring in transliterations
+valid_chars = set()
+
+# Create the replacement table. All replacements are assigned the same
+# frequency since there's only one replacement per combination of
+# input characters.
+for row in reader:
+    # line format (TSV): transliteration, character, frequency
+    print("%s\t%s\t%d" % (row['transliteration'], row['character'], 1),
+          file=buf)
+    if len(row['transliteration']) > maxlen:
+        maxlen = len(row['transliteration'])
+    valid_chars |= set(row['transliteration'])
+
+
+
 # file type header
 print("SCIM_Generic_Table_Phrase_Library_TEXT\n"
       "VERSION_1_0\n")
@@ -39,15 +66,8 @@ print("SERIAL_NUMBER = %s" % serial)
 print("ICON = %s" % icon)
 print("DESCRIPTION = %s" % desc)
 print("AUTHOR = %s" % author)
-
-# TODO: This should contain only characters that actually occur in the
-# table. Generating the list would require either moving away from the
-# stdin to stdout processing, or buffering the table output until the
-# header has been written.
-print('VALID_INPUT_CHARS = abcdefghijklmnopqrstuvwxyz')
-# TODO: Like VALID_INPUT_CHARS this should ideally be calculated from
-# the input
-print("MAX_KEY_LENGTH = 3")
+print("VALID_INPUT_CHARS = %s" % str().join(sorted(valid_chars)))
+print("MAX_KEY_LENGTH = %d" % maxlen)
 
 # This is a static replacement table, so use autocommit (just type, no
 # need to confirm replacements), and no complicated stuff.
@@ -61,12 +81,7 @@ print("LAYOUT = default\n"
       "DYNAMIC_ADJUST = FALSE\n"
       "END_DEFINITION\n")
 
-# Create the actual table. All replacements are assigned the same
-# frequency since there's only one replacement per combination of
-# input characters.
+# Write the actual table from buffer to output
 print('BEGIN_TABLE')
-reader = csv.DictReader(sys.stdin)
-for row in reader:
-    # line format (TSV): transliteration, character, frequency
-    print("%s\t%s\t%d" % (row['transliteration'], row['character'], 1))
+sys.stdout.write(buf.getvalue())
 print('END_TABLE')
