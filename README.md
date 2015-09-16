@@ -4,7 +4,7 @@ Transliteration data files for the Cherokee language and syllabary (ᏣᎳᎩ)
 This data maps Cherokee syllabic characters with their common/standardized transliterations, alternate transliterations, position on a syllabary chart, and a pronunciation guide (American English equivalence).  It's meant to aid in the design of transliteration and translation scripts/software, language learning tools, or informational displays, but can be useful for anything, so please take it and use it freely!
 
 Assembled by Natasha L. (@lupinia)
-Ibus-table generator script written and contributed by Airtower (@airtower-luna)
+Ibus-table generator script written and contributed by Airtower (@airtower_sendai)
 
 Fields
 ------
