@@ -73,7 +73,7 @@ print("MAX_KEY_LENGTH = %d" % maxlen)
 # need to confirm replacements), and no complicated stuff.
 print("LAYOUT = default\n"
       "AUTO_COMMIT = TRUE\n"
-      "AUTO_SELECT = FALSE\n"
+      "AUTO_SELECT = TRUE\n"
       "DEF_FULL_WIDTH_PUNCT = FALSE\n"
       "DEF_FULL_WIDTH_LETTER = FALSE\n"
       "USER_CAN_DEFINE_PHRASE = FALSE\n"

@@ -20,7 +20,7 @@ CLEANFILES = chr.txt $(DB)
 
 all: $(DB)
 
-chr.txt: $(CSV)
+chr.txt: $(CSV) csv-to-ibus.py
 	./csv-to-ibus.py < $< > $@
 
 %.db: %.txt
