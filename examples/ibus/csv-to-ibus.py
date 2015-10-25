@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import argparse
 import csv
 import io
 import sys
@@ -11,7 +12,14 @@ from datetime import datetime
 # https://creativecommons.org/publicdomain/zero/1.0/), use as you
 # wish!
 #
-# Usage: ./csv-to-ibus.py < chr.csv > chr.txt
+# Usage: ./csv-to-ibus.py [--icon ICON] < chr.csv > chr.txt
+
+parser = argparse.ArgumentParser()
+# Use this icon. If not set, a default question mark icon is used.
+parser.add_argument("-i", "--icon",
+                    help='Icon for the input method, default: py-mode.svg',
+                    default='py-mode.svg')
+args = parser.parse_args()
 
 # variables for table metadata that's likely to change
 desc = "Input method for Cherokee, based on Natasha's syllabary table"
@@ -19,8 +27,6 @@ author = "Thomas Klute <thomas2.klute@uni-dortmund.de>"
 uuid = "fa824c40-b615-46b0-807d-b9fa311c3a1c"
 # simple time based serial number, UTC to avoid any timezone confusion
 serial = datetime.utcnow().strftime('%Y%m%d%H%M')
-# TODO: find a nice public domain icon for Cherokee
-icon = "py-mode.svg"
 
 
 
@@ -63,7 +69,7 @@ print("BEGIN_DEFINITION\n"
 # Just one replacement per print() to avoid mixups
 print("UUID = %s" % uuid)
 print("SERIAL_NUMBER = %s" % serial)
-print("ICON = %s" % icon)
+print("ICON = %s" % args.icon)
 print("DESCRIPTION = %s" % desc)
 print("AUTHOR = %s" % author)
 print("VALID_INPUT_CHARS = %s" % str().join(sorted(valid_chars)))
