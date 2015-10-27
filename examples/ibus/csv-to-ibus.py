@@ -41,6 +41,13 @@ maxlen = 0
 # set to collect all characters occurring in transliterations
 valid_chars = set()
 
+# Dictionary with transliterations (keys) and character combinations
+# (values) for nah* quirks. Input sequences for "na-h*" character
+# combinations overlap with the "nah" character. This dictionary
+# contains combined replacements for such combinations so the user
+# can choose easily.
+nah_quirks = dict()
+
 # Create the replacement table. All replacements are assigned the same
 # frequency since there's only one replacement per combination of
 # input characters.
@@ -51,6 +58,12 @@ for row in reader:
     if len(row['transliteration']) > maxlen:
         maxlen = len(row['transliteration'])
     valid_chars |= set(row['transliteration'])
+    # process transliterations starting with 'h' for nah* quirks
+    if row['transliteration'][0] == 'h' and len(row['transliteration']) > 1:
+        k = 'na' + row['transliteration']
+        nah_quirks[k] = '\u13be' + row['character']
+        if len(k) > maxlen:
+            maxlen = len(k)
 
 
 
@@ -87,7 +100,13 @@ print("LAYOUT = default\n"
       "DYNAMIC_ADJUST = FALSE\n"
       "END_DEFINITION\n")
 
-# Write the actual table from buffer to output
 print('BEGIN_TABLE')
+
+# Write buffered table to output
 sys.stdout.write(buf.getvalue())
+
+# Add quirks for sequences starting with nah
+for k in nah_quirks.keys():
+    print("%s\t%s\t%d" % (k, nah_quirks[k], 1))
+
 print('END_TABLE')
