@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 import argparse
 import csv
-import io
 import sys
 from datetime import datetime
 
@@ -32,15 +31,13 @@ serial = datetime.utcnow().strftime('%Y%m%d%H%M')
 
 # CSV reader object to parse the syllabary table row by row
 reader = csv.DictReader(sys.stdin)
-# "buf" is a buffer for the replacement table. Collecting metadata
-# (maximum lenght of transliterations, valid characters) requires
-# parsing the input before writing the file header.
-buf = io.StringIO()
 # used to remember the maximum length of transliterations
 maxlen = 0
 # set to collect all characters occurring in transliterations
 valid_chars = set()
 
+# Character transliterations are collected in this dictionary
+characters = dict()
 # Dictionary with transliterations (keys) and character combinations
 # (values) for nah* quirks. Input sequences for "na-h*" character
 # combinations overlap with the "nah" character. This dictionary
@@ -52,9 +49,7 @@ nah_quirks = dict()
 # frequency since there's only one replacement per combination of
 # input characters.
 for row in reader:
-    # line format (TSV): transliteration, character, frequency
-    print("%s\t%s\t%d" % (row['transliteration'], row['character'], 1),
-          file=buf)
+    characters[row['transliteration']] = row['character']
     if len(row['transliteration']) > maxlen:
         maxlen = len(row['transliteration'])
     valid_chars |= set(row['transliteration'])
@@ -102,11 +97,9 @@ print("LAYOUT = default\n"
 
 print('BEGIN_TABLE')
 
-# Write buffered table to output
-sys.stdout.write(buf.getvalue())
-
-# Add quirks for sequences starting with nah
-for k in nah_quirks.keys():
-    print("%s\t%s\t%d" % (k, nah_quirks[k], 1))
+for (t, p) in [(characters, 2), (nah_quirks, 2)]:
+    for k in sorted(t.keys()):
+        # line format (TSV): transliteration, character, frequency
+        print("%s\t%s\t%d" % (k, t[k], p))
 
 print('END_TABLE')
