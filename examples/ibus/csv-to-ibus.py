@@ -44,10 +44,16 @@ characters = dict()
 # contains combined replacements for such combinations so the user
 # can choose easily.
 nah_quirks = dict()
+# collect transliterations starting with "s" here
+s_chars = list()
+# Based on s_chars, multi-character replacements for s plus vowel
+# combinations will be put into this dictionary.
+s_quirks = dict()
 
-# Create the replacement table. All replacements are assigned the same
-# frequency since there's only one replacement per combination of
-# input characters.
+
+
+# Parse the syllabary data row by row and collect what's needed to
+# build the replacement table
 for row in reader:
     characters[row['transliteration']] = row['character']
     if len(row['transliteration']) > maxlen:
@@ -59,6 +65,14 @@ for row in reader:
         nah_quirks[k] = '\u13be' + row['character']
         if len(k) > maxlen:
             maxlen = len(k)
+    # collect s* characters
+    elif row['transliteration'][0] == 's' and len(row['transliteration']) > 1:
+        s_chars.append(row['transliteration'])
+
+# Build multi-character replacements for s plus vowel combinations
+for c in s_chars:
+    if c[1:] in characters.keys():
+        s_quirks['s' + c[1:]] = '\u13cd' + characters[c[1:]]
 
 
 
@@ -97,7 +111,9 @@ print("LAYOUT = default\n"
 
 print('BEGIN_TABLE')
 
-for (t, p) in [(characters, 2), (nah_quirks, 2)]:
+# Write the replacement tables, starting with the basic characters,
+# followed by quirks. Each table can have its own frequency.
+for (t, p) in [(characters, 2), (nah_quirks, 2), (s_quirks, 1)]:
     for k in sorted(t.keys()):
         # line format (TSV): transliteration, character, frequency
         print("%s\t%s\t%d" % (k, t[k], p))
